@@ -109,12 +109,6 @@ fi
 
 sudo -u ${svc_user} mkdir runner
 
-# TODO: validate not in a container
-# TODO: validate systemd or osx svc installer
-
-#--------------------------------------
-# Get a config token
-#--------------------------------------
 echo
 echo "Generating a registration token..."
 
@@ -139,7 +133,6 @@ if [ "null" == "$RUNNER_TOKEN" -o -z "$RUNNER_TOKEN" ]; then fatal "Failed to ge
 echo
 echo "Downloading latest runner ..."
 
-# For the GHES Alpha, download the runner from github.com
 latest_version_label=$(curl -s -X GET 'https://api.github.com/repos/actions/runner/releases/latest' | jq -r '.tag_name')
 latest_version=$(echo ${latest_version_label:1})
 runner_file="actions-runner-${runner_plat}-${runner_arch}-${latest_version}.tar.gz"
@@ -157,22 +150,15 @@ fi
 
 ls -la *.tar.gz
 
-#---------------------------------------------------
-# extract to runner directory in this directory
-#---------------------------------------------------
 echo
 echo "Extracting ${runner_file} to ./runner"
 
 tar xzf "./${runner_file}" -C runner
 
-# export of pass
 sudo chown -R $svc_user ./runner
 
 pushd ./runner
 
-#---------------------------------------
-# Unattend config
-#---------------------------------------
 runner_url="https://github.com/${runner_scope}"
 if [ -n "${ghe_hostname}" ]; then
     runner_url="https://${ghe_hostname}/${runner_scope}"
@@ -183,9 +169,6 @@ echo "Configuring ${runner_name} @ $runner_url"
 echo "./config.sh --unattended --url $runner_url --token *** --name $runner_name ${labels:+--labels $labels} ${runner_group:+--runnergroup \"$runner_group\"} ${disableupdate:+--disableupdate}"
 sudo -E -u ${svc_user} ./config.sh --unattended --url $runner_url --token $RUNNER_TOKEN ${replace:+--replace} --name $runner_name ${labels:+--labels $labels} ${runner_group:+--runnergroup "$runner_group"} ${disableupdate:+--disableupdate}
 
-#---------------------------------------
-# Configuring as a service
-#---------------------------------------
 echo
 echo "Configuring as a service ..."
 prefix=""

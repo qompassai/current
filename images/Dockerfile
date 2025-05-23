@@ -1,4 +1,4 @@
-# /qompassai/current/images/Dockerfiles
+# /qompassai/current/images/Dockerfile
 # ------------------------------------------------
 # Copyright (C) 2025 Qompass AI, All rights reserved
 
@@ -11,7 +11,7 @@ ARG RUNNER_CONTAINER_HOOKS_VERSION=0.6.1
 ARG DOCKER_VERSION=28.0.1
 ARG BUILDX_VERSION=0.21.2
 
-RUN apt update -y && apt install curl unzip -y
+RUN apt-get update -y && apt install curl unzip -y
 
 WORKDIR /actions-runner
 RUN export RUNNER_ARCH=${TARGETARCH} \
@@ -46,7 +46,6 @@ RUN apt update -y \
     && apt install -y --no-install-recommends sudo lsb-release gpg-agent software-properties-common curl jq unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure git-core/ppa based on guidance here:  https://git-scm.com/download/linux
 RUN add-apt-repository ppa:git-core/ppa \
     && apt update -y \
     && apt install -y git \
@@ -66,4 +65,4 @@ COPY --from=build /usr/local/lib/docker/cli-plugins/docker-buildx /usr/local/lib
 
 RUN install -o root -g root -m 755 docker/* /usr/bin/ && rm -rf docker
 
-USER runner
+USER current
