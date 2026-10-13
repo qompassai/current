@@ -1,7 +1,7 @@
 {
   "title": "current",
   "description": "Qompass AI Current: Your self-hosted AI runner",
-  "license": "Q-CDA-1.0",
+  "license": "Apache-2.0",
   "language": "eng",
   "upload_type": "software",
   "access_right": "open",
