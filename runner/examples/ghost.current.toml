@@ -1,0 +1,11 @@
+# Ghost's inaugural Current job: the qompass-25_05 NixOS VM test.
+# The flake nests checks one level deep, so the attribute is
+# checks.x86_64-linux.x86_64-linux.qompass-25_05 (verified by hand
+# on primo 2026-10-15, exit 0). Run long nix work under tmux.
+repo = "ghost"
+
+[[checks]]
+name = "flake-qompass-25_05"
+argv = ["nix", "build", ".#checks.x86_64-linux.x86_64-linux.qompass-25_05"]
+workdir = "."
+timeout_secs = 3600
