@@ -86,6 +86,33 @@ fn missing_manifest_is_an_error() {
 }
 
 #[test]
+fn bare_name_is_not_captured_by_a_same_named_subdirectory() {
+    // Regression: the Ghost repo contains a ghost/ subdirectory, and
+    // `current run ghost` from inside the repo must resolve the repo
+    // under the search roots, not that subdirectory.
+    let parent = std::env::temp_dir().join(format!("current-cli-roots-{}", std::process::id()));
+    let repo = parent.join("demo-repo");
+    std::fs::create_dir_all(repo.join("demo-repo")).expect("nested same-name dir");
+    std::fs::write(
+        repo.join(".current.toml"),
+        "[[checks]]\nname = \"ok\"\nargv = [\"/bin/true\"]\n",
+    )
+    .expect("manifest written");
+    let output = Command::new(env!("CARGO_BIN_EXE_current"))
+        .args(["run", "demo-repo", "--results", "results.jsonl"])
+        .current_dir(&repo)
+        .env("CURRENT_REPO_ROOTS", &parent)
+        .output()
+        .expect("current binary runs");
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    std::fs::remove_dir_all(&parent).ok();
+}
+
+#[test]
 fn poll_trigger_is_a_loud_stub() {
     let output = Command::new(env!("CARGO_BIN_EXE_current"))
         .args(["poll", "whatever"])

@@ -122,9 +122,15 @@ fn default_results_path() -> PathBuf {
 }
 
 /// Resolve a repo argument to an existing directory.
+///
+/// A direct path wins only when it actually carries a manifest:
+/// a bare name typed inside a repo must not be captured by a
+/// same-named subdirectory of that repo (the Ghost repo contains a
+/// `ghost/` module directory, and `current run ghost` from inside
+/// it must still find `~/.GH/Qompass/ghost`).
 fn resolve_repo(repo_arg: &str) -> Result<PathBuf, String> {
     let direct = PathBuf::from(repo_arg);
-    if direct.is_dir() {
+    if direct.join(".current.toml").is_file() {
         return Ok(direct);
     }
     let mut roots: Vec<PathBuf> = Vec::new();
@@ -132,7 +138,7 @@ fn resolve_repo(repo_arg: &str) -> Result<PathBuf, String> {
         roots.extend(
             joined
                 .split(':')
-                .filter(|p| !p.is_empty())
+                .filter(|path| !path.is_empty())
                 .map(PathBuf::from),
         );
     }
@@ -145,6 +151,9 @@ fn resolve_repo(repo_arg: &str) -> Result<PathBuf, String> {
         if candidate.is_dir() {
             return Ok(candidate);
         }
+    }
+    if direct.is_dir() {
+        return Ok(direct);
     }
     Err(format!(
         "repo '{repo_arg}' not found as a path or under the search roots"
